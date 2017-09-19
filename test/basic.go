@@ -581,3 +581,28 @@ func (s *BasicSuite) TestTruncate(c *C) {
 
 	c.Assert(f.Close(), IsNil)
 }
+
+func (s *BasicSuite) TestFileLock(c *C) {
+	f, err := s.FS.Create("foo")
+	c.Assert(err, IsNil)
+
+	c.Assert(f.Lock(), IsNil)
+	c.Assert(f.Unlock(), IsNil)
+
+	c.Assert(f.Lock(), IsNil)
+	c.Assert(f.Unlock(), IsNil)
+
+	c.Assert(f.Close(), IsNil)
+
+	f, err = s.FS.Open("foo")
+	c.Assert(err, IsNil)
+
+	c.Assert(f.Lock(), IsNil)
+	c.Assert(f.Close(), IsNil)
+
+	f, err = s.FS.Open("foo")
+	c.Assert(err, IsNil)
+
+	c.Assert(f.Lock(), IsNil)
+	c.Assert(f.Close(), IsNil)
+}
