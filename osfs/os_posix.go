@@ -3,19 +3,19 @@
 package osfs
 
 import (
-	"os"
 	"syscall"
 )
 
-// Stat returns the FileInfo structure describing file.
-func (fs *OS) Stat(filename string) (os.FileInfo, error) {
-	return os.Stat(filename)
-}
+func (f *file) Lock() error {
+	f.m.Lock()
+	defer f.m.Unlock()
 
-// Lock protects file from access from other processes.
-func (f file) Lock() error {
 	return syscall.Flock(int(f.File.Fd()), syscall.LOCK_EX)
 }
-func (f file) Unlock() error {
+
+func (f *file) Unlock() error {
+	f.m.Lock()
+	defer f.m.Unlock()
+
 	return syscall.Flock(int(f.File.Fd()), syscall.LOCK_UN)
 }

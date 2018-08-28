@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/src-d/go-billy.v3"
+	"gopkg.in/src-d/go-billy.v4"
 )
 
 // Polyfill is a helper that implements all missing method from billy.Filesystem.
@@ -97,4 +97,9 @@ func (h *Polyfill) Root() string {
 
 func (h *Polyfill) Underlying() billy.Basic {
 	return h.Basic
+}
+
+// Capabilities implements the Capable interface.
+func (h *Polyfill) Capabilities() billy.Capability {
+	return billy.Capabilities(h.Basic)
 }

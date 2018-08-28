@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gopkg.in/src-d/go-billy.v3"
-	"gopkg.in/src-d/go-billy.v3/test"
+	"gopkg.in/src-d/go-billy.v4"
+	"gopkg.in/src-d/go-billy.v4/test"
 
 	. "gopkg.in/check.v1"
 )
@@ -35,6 +35,15 @@ func (s *ChrootSuite) TestCreateErrCrossedBoundary(c *C) {
 	fs := New(m, "/foo")
 	_, err := fs.Create("../foo")
 	c.Assert(err, Equals, billy.ErrCrossedBoundary)
+}
+
+func (s *ChrootSuite) TestLeadingPeriodsPathNotCrossedBoundary(c *C) {
+	m := &test.BasicMock{}
+
+	fs := New(m, "/foo")
+	f, err := fs.Create("..foo")
+	c.Assert(err, IsNil)
+	c.Assert(f.Name(), Equals, "..foo")
 }
 
 func (s *ChrootSuite) TestOpen(c *C) {
@@ -341,4 +350,19 @@ func (s *ChrootSuite) TestReadlinkWithBasic(c *C) {
 	fs := New(m, "/foo")
 	_, err := fs.Readlink("")
 	c.Assert(err, Equals, billy.ErrNotSupported)
+}
+
+func (s *ChrootSuite) TestCapabilities(c *C) {
+	testCapabilities(c, new(test.BasicMock))
+	testCapabilities(c, new(test.OnlyReadCapFs))
+	testCapabilities(c, new(test.NoLockCapFs))
+}
+
+func testCapabilities(c *C, basic billy.Basic) {
+	baseCapabilities := billy.Capabilities(basic)
+
+	fs := New(basic, "/foo")
+	capabilities := billy.Capabilities(fs)
+
+	c.Assert(capabilities, Equals, baseCapabilities)
 }

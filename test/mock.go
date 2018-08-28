@@ -6,7 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"gopkg.in/src-d/go-billy.v3"
+	"gopkg.in/src-d/go-billy.v4"
 )
 
 type BasicMock struct {
@@ -133,4 +133,24 @@ func (*FileMock) Unlock() error {
 
 func (*FileMock) Truncate(size int64) error {
 	return nil
+}
+
+type OnlyReadCapFs struct {
+	BasicMock
+}
+
+func (o *OnlyReadCapFs) Capabilities() billy.Capability {
+	return billy.ReadCapability
+}
+
+type NoLockCapFs struct {
+	BasicMock
+}
+
+func (o *NoLockCapFs) Capabilities() billy.Capability {
+	return billy.WriteCapability |
+		billy.ReadCapability |
+		billy.ReadAndWriteCapability |
+		billy.SeekCapability |
+		billy.TruncateCapability
 }
